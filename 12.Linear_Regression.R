@@ -89,8 +89,8 @@ lm_performance(df, df_cols_Prote$col, " ~ final_cluster + Sex_cate + Age","Prote
 
 df <- read_csv("./dataset/Linear_Regression_PRS_Dataset.csv")
 df <- facter_transform(df)
-lm_performance(df, c('PRS_SCORE_5e08', 'PRS_SCORE_1e07', 'PRS_SCORE_5e07', 'PRS_SCORE_1e06', 'PRS_SCORE_5e06'), " ~ final_cluster","PRS")
-lm_performance(df, c('PRS_SCORE_5e08', 'PRS_SCORE_1e07', 'PRS_SCORE_5e07', 'PRS_SCORE_1e06', 'PRS_SCORE_5e06'), " ~ final_cluster + Sex_cate + Age","PRS_with_Sex_Age")
+lm_performance(df, c('SCORE_5e08', 'SCORE_1e07', 'SCORE_5e07', 'SCORE_1e06', 'SCORE_5e06'), " ~ final_cluster","PRS")
+lm_performance(df, c('SCORE_5e08', 'SCORE_1e07', 'SCORE_5e07', 'SCORE_1e06', 'SCORE_5e06'), " ~ final_cluster + Sex_cate + Age","PRS_with_Sex_Age")
 
 df <- read_csv("./dataset/Linear_Regression_MRI_Dataset.csv")
 df <- facter_transform(df)

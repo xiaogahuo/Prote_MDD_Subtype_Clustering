@@ -64,8 +64,17 @@ def plot_volcano(dataset):
     plt.clf()
 
 if __name__ == '__main__':
-    feature_select("Diag")
+    # feature_select("DiagA")
+    # feature_select("DiagB")
+    # feature_select("Diag")
+    plot_volcano("DiagA")
+    plot_volcano("DiagB")
     plot_volcano("Diag")
+
+    # cols_sigA = pd.read_csv(result_path + "t_test_result_bonferroni_DiagA.csv")
+    # cols_sigB = pd.read_csv(result_path + "t_test_result_bonferroni_DiagB.csv")
+    # cols_sig = pd.merge(cols_sigA, cols_sigB, how='inner', on='col', suffixes=('_A', '_B'), copy=True, indicator=False)
+    # cols_sig.to_csv(result_path + "t_test_result_bonferroni_DiagA&B.csv", index=None)
 
 
 

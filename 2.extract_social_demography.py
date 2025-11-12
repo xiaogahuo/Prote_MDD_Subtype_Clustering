@@ -1,5 +1,5 @@
 import pandas as pd
-
+from sklearn.model_selection import train_test_split
 from SUtils import *
 
 def social_stats(exps):
@@ -233,58 +233,81 @@ def get_preprocess_data():
                                              df_diag[df_diag['MDD'] == MDD].shape[0]))
 
 
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+def stratified_split_even(df, group_col, test_size=0.5, random_state=0):
+    """
+    把 df 按 group_col 分层拆成两份，允许 singleton 类存在。
+    返回 df_A, df_B
+    """
+    # 1. 计算每类样本数
+    vc = df[group_col].value_counts()
+    singleton_cls = vc[vc == 1].index        # 独苗类
+    normal_cls    = vc[vc >= 2].index        # 正常类
+
+    # 2. 独苗类单独处理：交替分配到两份，保证数量差 ≤1
+    singleton_df = df[df[group_col].isin(singleton_cls)]
+    other_df     = df[df[group_col].isin(normal_cls)]
+
+    # 随机打乱顺序
+    singleton_df = singleton_df.sample(frac=1, random_state=random_state)
+    # 交替分配
+    df_A_extra = singleton_df.iloc[::2]
+    df_B_extra = singleton_df.iloc[1::2]
+
+    # 3. 正常类用 stratify 拆分
+    if len(other_df) > 0:
+        df_A_normal, df_B_normal = train_test_split(
+            other_df,
+            test_size=0.5,
+            stratify=other_df[group_col],
+            random_state=random_state
+        )
+    else:
+        df_A_normal = df_B_normal = other_df
+
+    # 4. 合并
+    df_A = pd.concat([df_A_normal, df_A_extra], ignore_index=True)
+    df_B = pd.concat([df_B_normal, df_B_extra], ignore_index=True)
+
+    return df_A, df_B
+
+
 if __name__ == '__main__':
-    # get_preprocess_data()
+    # # get_preprocess_data()
+    # #
+    # # df = pd.read_csv(data_path + "{}.csv".format("Diag"))
+    # # df_MDD, df_NC = df[df['MDD'] == MDD], df[df['MDD'] == NC]
+    # # df_MDD.to_csv(data_path + "{}_MDD.csv".format("Diag"), index=None)
+    # # df_NC.to_csv(data_path + "{}_NC.csv".format("Diag"), index=None)
+    # df_MDD, df_NC = pd.read_csv(data_path + "Diag_MDD.csv", low_memory=False), pd.read_csv(data_path + "Diag_NC.csv", low_memory=False)
+    # # print(df_MDD.columns.tolist())
+    # # df_MDD['group_ID'] = df_MDD['Sex_cate'].astype(str) + '_' + df_MDD['Age'].astype(str)
+    # # df_NC['group_ID'] = df_NC['Sex_cate'].astype(str) + '_' + df_NC['Age'].astype(str)
+    # # # ---------------- 用法示例 ----------------
+    # # df_MDD_A, df_MDD_B = stratified_split_even(df_MDD, group_col='group_ID', test_size=0.5, random_state=0)
+    # # df_NC_A, df_NC_B = stratified_split_even(df_NC, group_col='group_ID', test_size=0.5, random_state=0)
     #
-    # df = pd.read_csv(data_path + "{}.csv".format("Diag"))
-    # df_MDD, df_NC = df[df['MDD'] == MDD], df[df['MDD'] == NC]
-    # df_MDD.to_csv(data_path + "{}_MDD.csv".format("Diag"), index=None)
-    # df_NC.to_csv(data_path + "{}_NC.csv".format("Diag"), index=None)
+    # # print("MDD:{}, NC:{}".format(df_MDD.shape[0], df_NC.shape[0]))
+    # df_MDD_A, df_MDD_B = (lambda x: x.sample(frac=1, random_state=0).pipe(lambda y: (y.iloc[:int(len(y) * 0.7)], y.iloc[int(len(y) * 0.7):])))(df_MDD)
+    # # print("MDD_A:{}, MDD_B:{}".format(df_MDD_A.shape[0], df_MDD_B.shape[0]))
+    # df_NC_A, df_NC_B = (lambda x: x.sample(frac=1, random_state=0).pipe(lambda y: (y.iloc[:int(len(y) * 0.7)], y.iloc[int(len(y) * 0.7):])))(df_NC)
+    # # print("NC_A:{}, NC_B:{}".format(df_NC_A.shape[0], df_NC_B.shape[0]))
+    # df_MDD_A.to_csv(data_path + "DiagA_MDD.csv", index=None)
+    # df_MDD_B.to_csv(data_path + "DiagB_MDD.csv", index=None)
+    # df_NC_A.to_csv(data_path + "DiagA_NC.csv", index=None)
+    # df_NC_B.to_csv(data_path + "DiagB_NC.csv", index=None)
+    # df_A = pd.concat([df_MDD_A, df_NC_A])
+    # df_B = pd.concat([df_MDD_B, df_NC_B])
+    # df_A.to_csv(data_path + "DiagA.csv", index=None)
+    # df_B.to_csv(data_path + "DiagB.csv", index=None)
+    # print("Diag_A:{}, Diag_B:{}".format(df_A.shape[0], df_B.shape[0]))
 
     # 4. 社会人口学数据统计
-    exps = ['Diag']
+    exps = ['Diag', 'DiagA', 'DiagB']
     social_stats(exps)
 
-    # exps = ['Cox']
-    # conti_cols = ['follow_Duration']
-    # for exp in exps:
-    #     df = pd.read_csv(data_path + exp + '.csv')
-    #     print('---------------exp: {}, number: {}------------------------'.format(exp, df.shape[0]))
-    #     for col in conti_cols:
-    #         count_mean_std(col, df)
-    #     for col in conti_cols:
-    #         count_mean_std_group_by_div_feature(col, 'MDD', df)
-    #         kwtest(col, 'MDD', df)
-
-    # def perform_t_test(dataset):
-    #     df = pd.read_csv(data_path + "{}.csv".format(dataset))
-    #     df0 = df[df['MDD'] == NC]
-    #     df1 = df[df['MDD'] == MDD]
-    #     f = open(result_path + "t_test_result_{}.csv".format(dataset), "w")
-    #     print("col,tstat,pval,M_all,STD_all,M0,STD0,M1,STD1", file=f)
-    #     for col in Prote_cols_100:
-    #         tstat, pval = count_T(col, 'MDD', df)
-    #         M_all = df[col].mean()
-    #         STD_all = df[col].std(ddof=1)
-    #         M0 = df0[col].mean()
-    #         STD0 = df0[col].std(ddof=1)
-    #         M1 = df1[col].mean()
-    #         STD1 = df1[col].std(ddof=1)
-    #         print("{},{},{},{},{},{},{},{},{}".format(col, tstat, pval, M_all, STD_all, M0, STD0, M1, STD1), file=f)
-    #
-    #
-    # perform_t_test("Cox")
-    # perform_t_test("Diag")
-
-    # df = pd.read_csv(data_path + "{}.csv".format("ALL"))
-    # print("df: {}, B0:{}, B1:{}, B2:{}, B-1:{}".format(df.shape[0], df[df['Btime'] == 0].shape[0],
-    #                                          df[df['Btime'] == 1].shape[0],df[df['Btime'] == 2].shape[0],
-    #                                          df[df['Btime'] == -1].shape[0]))
-
-    # df_prote = pd.read_csv(path + "proteomics.csv")
-    # cols_p = df_prote.columns.tolist()[2:]  # excluded: 'Unnamed: 0', 'eid'
-    # for col in cols_p:
-    #     print("col: {}, min: {}, max: {}, mean: {}, std: {}".format(col, df_prote[col].min(), df_prote[col].max(), df_prote[col].mean(), df_prote[col].std(ddof=0)))
 
 
 

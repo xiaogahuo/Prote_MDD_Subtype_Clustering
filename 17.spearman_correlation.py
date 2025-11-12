@@ -1,15 +1,15 @@
 from SUtils import *
 from scipy.stats import spearmanr
 
-def corr():
-    df = pd.read_csv(data_path + "Linear_Regression_PRS_Dataset.csv", low_memory=False)
+def corr(exp):
+    df = pd.read_csv(data_path + f"Linear_Regression_PRS_Dataset_{exp}.csv", low_memory=False)
     print(df.columns.tolist())
 
-    bonferroni_file = result_path + "t_test_result_bonferroni_Diag.csv"
+    bonferroni_file = result_path + f"t_test_result_bonferroni_{exp}.csv"
     cols = pd.read_csv(bonferroni_file)['col'].tolist()
     prs_cols = ['5e08', '1e07', '5e07', '1e06', '5e06', '1e05', '5e05', '1e04', '5e04', '1e03', '5e03', '1e02', '5e02']
 
-    f = open(result_path + "spearmanr_corr_result.csv", "w")
+    f = open(result_path + f"spearmanr_corr_result_{exp}.csv", "w")
     print("prote_col,PRS_col,all_pval,all_coef,0_pval,0_coef,1_pval,1_coef,2_pval,2_coef,MDD_pval,MDD_coef", file=f)
     for prote_col in cols:
         for PRS_col in prs_cols:
@@ -23,4 +23,6 @@ def corr():
 
 
 if __name__ == '__main__':
-    corr()
+    # corr('Diag')
+    corr('DiagA')
+    corr('DiagB')

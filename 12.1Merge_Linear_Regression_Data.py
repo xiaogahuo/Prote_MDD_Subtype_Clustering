@@ -4,16 +4,16 @@ from SUtils import *
 from functools import reduce
 from scipy.stats.mstats import kruskal
 
-def merge_data():
-    bonferroni_file = result_path + "t_test_result_bonferroni_Diag.csv"
+def merge_data(exp):
+    bonferroni_file = result_path + f"t_test_result_bonferroni_{exp}.csv"
     cols = pd.read_csv(bonferroni_file)['col'].tolist()
-    df_MDD, df_NC = pd.read_csv(data_path + "Diag_MDD.csv", low_memory=False), pd.read_csv(data_path + "Diag_NC.csv", low_memory=False)
+    df_MDD, df_NC = pd.read_csv(data_path + f"{exp}_MDD.csv", low_memory=False), pd.read_csv(data_path + f"{exp}_NC.csv", low_memory=False)
     df_NC['final_cluster'] = 0
-    df_Y = pd.read_csv(result_path + "{}/{}_components_cluster_rst_{}.csv".format("NMF", 2, 2), low_memory=False,
+    df_Y = pd.read_csv(result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", 2, 2), low_memory=False,
                        usecols=['eid', 'final_cluster'])
     df_MDD = pd.merge(df_MDD, df_Y, how='inner', on='eid', sort=True, suffixes=('_x', '_y'), copy=True, indicator=False)
     df = pd.concat([df_MDD, df_NC], ignore_index=True)
-    df[['eid', 'final_cluster']+cols+covr_cols].to_csv(data_path + "Linear_Regression_Prote_Dataset.csv", index=False)
+    df[['eid', 'final_cluster']+cols+covr_cols].to_csv(data_path + f"Linear_Regression_Prote_Dataset_{exp}.csv", index=False)
 
     df_PRS_ALL = [df[['eid', 'final_cluster']+cols+covr_cols]]
     for f in ['5e08', '1e07', '5e07', '1e06', '5e06', '1e05', '5e05', '1e04', '5e04', '1e03', '5e03', '1e02', '5e02']:
@@ -21,7 +21,7 @@ def merge_data():
         df_PRS.rename(columns={'#FID': 'eid', 'SCORE1_AVG': 'SCORE_'+f}, inplace=True)
         df_PRS_ALL.append(df_PRS)
     df_PRS_ALL = reduce(lambda left, right: pd.merge(left, right, on=['eid'], how='inner'), df_PRS_ALL)
-    df_PRS_ALL.to_csv(data_path + "Linear_Regression_PRS_Dataset.csv", index=False)
+    df_PRS_ALL.to_csv(data_path + f"Linear_Regression_PRS_Dataset_{exp}.csv", index=False)
 
     # cols_MRI = pd.read_excel(path + "Cate192_cols.xlsx")['FieldID'].tolist()
     # print(cols_MRI)
@@ -56,7 +56,7 @@ def merge_data():
     df_MRI.rename(columns=dict(zip(cols_MRI, new_cols)), inplace=True)
     grouped = df_MRI.groupby('final_cluster').size()
     print(grouped)
-    df_MRI.to_csv(data_path + "Linear_Regression_MRI_Dataset.csv", index=False)
+    df_MRI.to_csv(data_path + f"Linear_Regression_MRI_Dataset_{exp}.csv", index=False)
 
 
 def social_stats(exps):
@@ -103,8 +103,8 @@ def kw_compare_MRI():
         print(val_str, file=f)
 
 
-def plot_bar_PRS():
-    df = pd.read_csv(data_path + "Linear_Regression_PRS_Dataset.csv", low_memory=False)
+def plot_bar_PRS(exp):
+    df = pd.read_csv(data_path + f"Linear_Regression_PRS_Dataset_{exp}.csv", low_memory=False)
     df['final_cluster'] = df['final_cluster'].replace({0: 'HC', 1: 'Subtpye1', 2: 'Subtpye2'})
     PRS_cols = ['SCORE_5e08', 'SCORE_1e07', 'SCORE_5e07', 'SCORE_1e06', 'SCORE_5e06', 'SCORE_1e05', 'SCORE_5e05', 'SCORE_1e04', 'SCORE_5e04', 'SCORE_1e03', 'SCORE_5e03', 'SCORE_1e02', 'SCORE_5e02']
     new_cols = ['5e-08', '1e-07', '5e-07', '1e-06', '5e-06', '1e-05', '5e-05', '1e-04', '5e-04', '1e-03', '5e-03', '0.01', '0.05']
@@ -112,16 +112,22 @@ def plot_bar_PRS():
     print(df.head())
     for col in new_cols:
         df[col] = (df[col] - df[col].mean())/df[col].std()
-    plot_bar(df, 'PRS', new_cols, 13, 4, ['HC', 'Subtpye1', 'Subtpye2'], 'PRS_Zscore')
+    plot_bar(df, f'PRS_{exp}', new_cols, 13, 4, ['HC', 'Subtpye1', 'Subtpye2'], 'PRS_Zscore')
+
 
 if __name__ == '__main__':
-    merge_data()
+    # merge_data('Diag')
+    # merge_data('DiagA')
+    # merge_data('DiagB')
+    # plot_bar_PRS('Diag')
+    # plot_bar_PRS('DiagA')
+    # plot_bar_PRS('DiagB')
 
-    # # 4. 社会人口学数据统计
-    # exps = ['Linear_Regression_PRS_Dataset', 'Linear_Regression_MRI_Dataset']
-    # social_stats(exps)
+    # 4. 社会人口学数据统计
+    exps = ['Linear_Regression_PRS_Dataset_Diag', 'Linear_Regression_PRS_Dataset_DiagA', 'Linear_Regression_PRS_Dataset_DiagB']
+    social_stats(exps)
     #
     # # kw_compare_MRI()
-    # plot_bar_PRS()
+
 
 

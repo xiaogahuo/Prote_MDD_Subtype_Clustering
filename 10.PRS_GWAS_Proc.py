@@ -1,5 +1,4 @@
 import pandas as pd
-
 from SUtils import *
 import sys
 
@@ -66,14 +65,14 @@ def Sample_QC_IDS():
 # 2  5053312  5053312       1490                  704.180   -0.000345
 # 3  1780405  1780405       1490                  721.000   -0.001148
 # 4  3030933  3030933       1490                  734.004   -0.000045
-def PRS_score_kwtest(PRS_file, clust_N):
+def PRS_score_kwtest(PRS_file, exp, clust_N):
     df_PRS = pd.read_csv(PRS_path + "{}_PRS.sscore".format(PRS_file), sep=r'[ \t]', engine='python')
     df_PRS.rename(columns={'#FID': 'eid'}, inplace=True)
     # print(df_PRS.head())
-    print("************************************************"+"{}: {}".format(PRS_file, clust_N)+"************************************************")
-    df_MDD, df_NC = pd.read_csv(data_path + "Diag_MDD.csv", low_memory=False), pd.read_csv(data_path + "Diag_NC.csv", low_memory=False)
+    print("************************************************"+"{}, {}: {}".format(exp, PRS_file, clust_N)+"************************************************")
+    df_MDD, df_NC = pd.read_csv(data_path + f"{exp}_MDD.csv", low_memory=False), pd.read_csv(data_path + f"{exp}_NC.csv", low_memory=False)
     df_NC['final_cluster'] = 0
-    df_Y = pd.read_csv(result_path + "{}/{}_components_cluster_rst_{}.csv".format("NMF", 2, 2), low_memory=False, usecols=['eid', 'final_cluster'])
+    df_Y = pd.read_csv(result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", 2, 2), low_memory=False, usecols=['eid', 'final_cluster'])
 
     if (clust_N == '0vs1'):
         df_Y = df_Y[df_Y['final_cluster'] == 1]
@@ -107,6 +106,12 @@ if __name__ == '__main__':
     # Sample_QC_IDS()
 
     for f in ['5e08', '1e07', '5e07', '1e06', '5e06', '1e05','5e05','1e04','5e04','1e03','5e03','1e02','5e02']:
-        PRS_score_kwtest(f, '0vs1')
-        PRS_score_kwtest(f, '0vs2')
-        PRS_score_kwtest(f, '1vs2')
+        PRS_score_kwtest(f, 'Diag', '0vs1')
+        PRS_score_kwtest(f, 'Diag', '0vs2')
+        PRS_score_kwtest(f, 'Diag', '1vs2')
+        PRS_score_kwtest(f, 'DiagA', '0vs1')
+        PRS_score_kwtest(f, 'DiagA', '0vs2')
+        PRS_score_kwtest(f, 'DiagA', '1vs2')
+        PRS_score_kwtest(f, 'DiagB', '0vs1')
+        PRS_score_kwtest(f, 'DiagB', '0vs2')
+        PRS_score_kwtest(f, 'DiagB', '1vs2')
