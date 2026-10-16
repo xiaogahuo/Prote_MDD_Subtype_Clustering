@@ -20,15 +20,6 @@ def kwtest(feature_name, target_feature, df):
 
 # def mapping_prote_uniprot():
 #     df = pd.read_excel(path +'NEW蛋白组学词典.xlsx', engine='openpyxl', sheet_name='NEW蛋白组学词典', usecols=['Assay', 'UniProt'])
-#     bonferroni_file = result_path + "t_test_result_bonferroni_Diag7.csv"
-#     df_sig = pd.read_csv(bonferroni_file, usecols=['col'])
-#     df_sig = pd.merge(df_sig, df, left_on='col', right_on='Assay', how='left')
-#     df_sig.to_csv(result_path+"t_test_result_bonferroni_Prote_Uniprot.csv", index=False)
-#     print(df_sig.shape)
-
-
-# def mapping_prote_uniprot():
-#     df = pd.read_excel(path +'NEW蛋白组学词典.xlsx', engine='openpyxl', sheet_name='NEW蛋白组学词典', usecols=['Assay', 'UniProt'])
 #     df_col = pd.DataFrame({'col': Prote_cols_all})
 #     df_sig = pd.merge(df_col, df, left_on='col', right_on='Assay', how='left')
 #     df_sig.to_csv(result_path+"ALL_Prote_Uniprot.csv", index=False)
@@ -36,12 +27,13 @@ def kwtest(feature_name, target_feature, df):
 
 
 def format_GSEA_data(exp):
-    bonferroni_file = result_path + f"t_test_result_bonferroni_{exp}.csv"
-    cols = pd.read_csv(bonferroni_file)['col'].tolist()
-    df_MDD, df_NC = pd.read_csv(data_path + f"{exp}_MDD.csv", low_memory=False, usecols=['eid']+Prote_cols_all), pd.read_csv(data_path + f"{exp}_NC.csv", low_memory=False, usecols=['eid']+Prote_cols_all)
+    cols = Prote_cols_all
+    df_NC = pd.read_csv(data_path + f"{exp}_NC.csv", low_memory=False, usecols=['eid']+cols)
+    df_MDD = pd.read_csv(data_path + f"{exp}_MDD.csv", low_memory=False, usecols=['eid'] + cols)
     df_NC['final_cluster'] = 0
-    df_Y = pd.read_csv(result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", 2, 2), low_memory=False, usecols=['eid', 'final_cluster'])
-    df_MDD = pd.merge(df_MDD, df_Y, on='eid', how='inner')
+    df_Y = pd.read_csv(result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", 2, 2),
+                         low_memory=False, usecols=['eid', 'final_cluster'])
+    df_MDD = reduce(lambda left, right: pd.merge(left, right, on=['eid'], how='inner'), [df_MDD, df_Y])
     df_MDD_clst1, df_MDD_clst2 = df_MDD[df_MDD['final_cluster'] == 1], df_MDD[df_MDD['final_cluster'] == 2]
     df_clst1, df_clst2 = pd.concat([df_NC, df_MDD_clst1]), pd.concat([df_NC, df_MDD_clst2])
 
@@ -49,24 +41,23 @@ def format_GSEA_data(exp):
     df = pd.read_csv(path +'ALL_Prote_Uniprot.csv', usecols=['Assay', 'UniProt'])
     dicts = dict(zip(df['Assay'].tolist(), df['UniProt'].tolist()))
 
-    f_clst1, f_clst2 = open(result_path + f"GSEA_data_{exp}_clst1.csv", "w"), open(result_path + f"GSEA_data_{exp}_clst2.csv", "w")
-    print("logFC,P.Value,GeneName", file=f_clst1), print("logFC,P.Value,GeneName", file=f_clst2)
-    # print("logFC,GeneName", file=f_clst1), print("logFC,GeneName", file=f_clst2)
-    # for prote, i in zip(Prote_cols_all, range(len(Prote_cols_all))):
+    f_clst1, f_clst2 = open(result_path + f"GO_KEGG_sig_cols_clst1_{exp}.csv", "w"), open(
+        result_path + f"GO_KEGG_sig_cols_clst2_{exp}.csv", "w")
+    print("col,foldchange,NC_mean,Clst1_mean,P.Value,GeneName", file=f_clst1), print(
+        "col,foldchange,NC_mean,Clst2_mean,P.Value,GeneName", file=f_clst2)
     for prote, i in zip(cols, range(len(cols))):
         print('i:{}, prote:{}'.format(i, prote))
         mean_NC, mean_clst1, mean_clst2 = df_NC[prote].mean(), df_MDD_clst1[prote].mean(), df_MDD_clst2[prote].mean()
-        logFC_clst1, logFC_clst2 = np.log2((mean_clst1+1)/(mean_NC+1)), np.log2((mean_clst2+1)/(mean_NC+1))
-        # logFC_clst1, logFC_clst2 = mean_clst1-mean_NC, mean_clst2-mean_NC
+        Clst1_minus_NC, Clst2_minus_NC = mean_clst1-mean_NC, mean_clst2-mean_NC
         pvalue_clst1, pvalue_clst2 = kwtest(prote, 'final_cluster', df_clst1), kwtest(prote, 'final_cluster', df_clst2)
-        print("{},{},{}".format(logFC_clst1, pvalue_clst1, dicts.get(prote, "")), file=f_clst1)
-        print("{},{},{}".format(logFC_clst2, pvalue_clst2, dicts.get(prote, "")), file=f_clst2)
-        # print("{},{}".format(logFC_clst1, dicts.get(prote, "")), file=f_clst1)
-        # print("{},{}".format(logFC_clst2, dicts.get(prote, "")), file=f_clst2)
+        print("{},{},{},{},{},{}".format(prote, Clst1_minus_NC, mean_NC, mean_clst1, pvalue_clst1, dicts.get(prote, "")),
+              file=f_clst1)
+        print("{},{},{},{},{},{}".format(prote, Clst2_minus_NC, mean_NC, mean_clst2, pvalue_clst2, dicts.get(prote, "")),
+              file=f_clst2)
 
 
 def sig(exp, clust):
-    csv_file = result_path + f"GSEA_data_{exp}_{clust}.csv"
+    csv_file = result_path + f"GO_KEGG_sig_cols_{clust}_{exp}.csv"
     df = pd.read_csv(csv_file)
     bool_r, p_fdr = fdrcorrection(df['P.Value'].tolist(), alpha=0.05, method='indep', is_sorted=False)
     df['adj.P.Val'] = pd.Series(p_fdr)
@@ -74,15 +65,13 @@ def sig(exp, clust):
 
 
 if __name__ == '__main__':
-    format_GSEA_data('Diag')
-    format_GSEA_data('DiagA')
-    format_GSEA_data('DiagB')
-    sig('Diag', 'clst1')
-    sig('Diag', 'clst2')
-    sig('DiagA', 'clst1')
-    sig('DiagA', 'clst2')
-    sig('DiagB', 'clst1')
-    sig('DiagB', 'clst2')
+    format_GSEA_data('Diag_Discovery')
+    format_GSEA_data('Diag_Test')
+
+    sig('Diag_Discovery', 'clst1')
+    sig('Diag_Discovery', 'clst2')
+    sig('Diag_Test', 'clst1')
+    sig('Diag_Test', 'clst2')
 
 
 

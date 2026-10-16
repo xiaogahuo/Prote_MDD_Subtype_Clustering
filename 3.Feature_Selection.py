@@ -40,14 +40,15 @@ def sig(dataset):
     df_bernoulli = df[df['pval'] < 0.05/2911]
     df_bernoulli.to_csv(bernoulli_file, index=None)
 
-    bool_r, p_fdr = fdrcorrection(df['pval'].tolist(), alpha=0.05, method='indep', is_sorted=False)
-    df['fdr_adj'] = pd.Series(p_fdr)
-    df_fdr = df[df['fdr_adj'] < 0.05]
-    df_fdr.to_csv(fdr_file, index=None)
+    # bool_r, p_fdr = fdrcorrection(df['pval'].tolist(), alpha=0.05, method='indep', is_sorted=False)
+    # df['fdr_adj'] = pd.Series(p_fdr)
+    # df_fdr = df[df['fdr_adj'] < 0.05]
+    # df_fdr.to_csv(fdr_file, index=None)
 
 
 # https://hemtools.readthedocs.io/en/latest/content/Bioinformatics_Core_Competencies/Volcanoplot.html
 def plot_volcano(dataset):
+    os.makedirs(img_path, exist_ok=True)
     df = pd.read_csv(result_path + "t_test_result_{}.csv".format(dataset))
 
     plt.scatter(x=df['M1'], y=df['pval'].apply(lambda x: -np.log10(x)), s=1, label="Not significant")
@@ -64,17 +65,18 @@ def plot_volcano(dataset):
     plt.clf()
 
 if __name__ == '__main__':
-    # feature_select("DiagA")
-    # feature_select("DiagB")
-    # feature_select("Diag")
-    plot_volcano("DiagA")
-    plot_volcano("DiagB")
-    plot_volcano("Diag")
+    feature_select("Diag_Discovery")
+    feature_select("Diag_Test")
+    plot_volcano("Diag_Discovery")
+    plot_volcano("Diag_Test")
 
-    # cols_sigA = pd.read_csv(result_path + "t_test_result_bonferroni_DiagA.csv")
-    # cols_sigB = pd.read_csv(result_path + "t_test_result_bonferroni_DiagB.csv")
-    # cols_sig = pd.merge(cols_sigA, cols_sigB, how='inner', on='col', suffixes=('_A', '_B'), copy=True, indicator=False)
-    # cols_sig.to_csv(result_path + "t_test_result_bonferroni_DiagA&B.csv", index=None)
+    cols_sig_Discovery = pd.read_csv(result_path + "t_test_result_bonferroni_Diag_Discovery.csv")
+    print(cols_sig_Discovery.shape[0])
+    # cols_sigB_Test = pd.read_csv(result_path + "t_test_result_bonferroni_Diag_Test.csv")
+    # print(cols_sigB_Test.shape[0])
+    # cols_sig = pd.merge(cols_sig_Discovery, cols_sigB_Test, how='inner', on='col', suffixes=('_A', '_B'), copy=True, indicator=False)
+    # print(cols_sig.shape[0])
+    # cols_sig.to_csv(result_path + "t_test_result_bonferroni_Diag_Discovery&Diag_Test.csv", index=None)
 
 
 

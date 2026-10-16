@@ -8,12 +8,13 @@ from SUtils import *
 
 
 def display_tsne_umap(exp):
-    bernoulli_file = result_path + f"t_test_result_bonferroni_{exp}.csv"
-    cols = pd.read_csv(bernoulli_file)['col']
+    cols = load_prote_sig_cols()
     df_MDD = pd.read_csv(data_path + f"{exp}_MDD.csv")
     print(df_MDD.head(20))
     X = df_MDD[cols]
     # cmap_colors = ListedColormap(['#A1C9F4', '#FFB482', '#8DE5A1', '#FF9F9B', '#B39FDB', '#0077BB', '#EE7733', '#33BBEE'])
+    if not os.path.exists(img_path + "{}/{}/".format(exp, "NMF")):
+        os.makedirs(img_path + "{}/{}/".format(exp, "NMF"))
     for n_components in range(2, 3):
         for cluster_num in range(2, 3):
             # 加载数据集
@@ -46,6 +47,5 @@ def display_tsne_umap(exp):
 
 
 if __name__ == '__main__':
-    display_tsne_umap('Diag')
-    display_tsne_umap('DiagA')
-    display_tsne_umap('DiagB')
+    display_tsne_umap('Diag_Discovery')
+    display_tsne_umap('Diag_Test')

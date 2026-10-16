@@ -3,6 +3,20 @@ from SUtils import *
 import sys
 
 
+def kwtest(feature_name, target_feature, df):
+    print('kwtest结果: <' + feature_name + "> on <" + target_feature + ">")
+    # print(df.drop_duplicates(subset=[target_feature], keep='first')[target_feature])
+    target_feature_value_list = df.drop_duplicates(subset=[target_feature], keep='first')[target_feature].tolist()
+    print(target_feature_value_list)
+    kw_data = []
+    for value in target_feature_value_list:
+        feature_name_value_list = df[df[target_feature] == value][feature_name].tolist()
+        kw_data.append(feature_name_value_list)
+    statistic, pvalue = kruskalwallis(*kw_data) #  将kw_data中的值作为参数传入kruskalwallis中, 第1个值是第1个参数， 第2个值是第2个参数
+    print("column: {}, statistic: {}, pvalue: {}".format(feature_name, statistic, pvalue))
+    print('-'*25)
+
+
 def save_dataframe_in_chunks(df, chr, s_name, chunksize=9990):
     """
     将pandas DataFrame按指定的行数分割并保存为多个文件。
@@ -67,6 +81,8 @@ def Sample_QC_IDS():
 # 4  3030933  3030933       1490                  734.004   -0.000045
 def PRS_score_kwtest(PRS_file, exp, clust_N):
     df_PRS = pd.read_csv(PRS_path + "{}_PRS.sscore".format(PRS_file), sep=r'[ \t]', engine='python')
+    mean, std = df_PRS['SCORE1_AVG'].mean(), df_PRS['SCORE1_AVG'].std()
+    df_PRS['SCORE1_AVG'] = (df_PRS['SCORE1_AVG'] - mean) / std
     df_PRS.rename(columns={'#FID': 'eid'}, inplace=True)
     # print(df_PRS.head())
     print("************************************************"+"{}, {}: {}".format(exp, PRS_file, clust_N)+"************************************************")
@@ -106,12 +122,9 @@ if __name__ == '__main__':
     # Sample_QC_IDS()
 
     for f in ['5e08', '1e07', '5e07', '1e06', '5e06', '1e05','5e05','1e04','5e04','1e03','5e03','1e02','5e02']:
-        PRS_score_kwtest(f, 'Diag', '0vs1')
-        PRS_score_kwtest(f, 'Diag', '0vs2')
-        PRS_score_kwtest(f, 'Diag', '1vs2')
-        PRS_score_kwtest(f, 'DiagA', '0vs1')
-        PRS_score_kwtest(f, 'DiagA', '0vs2')
-        PRS_score_kwtest(f, 'DiagA', '1vs2')
-        PRS_score_kwtest(f, 'DiagB', '0vs1')
-        PRS_score_kwtest(f, 'DiagB', '0vs2')
-        PRS_score_kwtest(f, 'DiagB', '1vs2')
+        PRS_score_kwtest(f, 'Diag_Discovery', '0vs1')
+        PRS_score_kwtest(f, 'Diag_Discovery', '0vs2')
+        PRS_score_kwtest(f, 'Diag_Discovery', '1vs2')
+        PRS_score_kwtest(f, 'Diag_Test', '0vs1')
+        PRS_score_kwtest(f, 'Diag_Test', '0vs2')
+        PRS_score_kwtest(f, 'Diag_Test', '1vs2')

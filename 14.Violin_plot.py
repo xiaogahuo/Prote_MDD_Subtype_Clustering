@@ -21,6 +21,5 @@ def plot(exp):
         plt.clf()
 
 if __name__ == '__main__':
-    plot('Diag')
-    plot('DiagA')
-    plot('DiagB')
+    plot('Diag_Discovery')
+    plot('Diag_Test')

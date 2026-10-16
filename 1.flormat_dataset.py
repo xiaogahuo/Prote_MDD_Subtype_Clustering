@@ -29,10 +29,20 @@ def AD_exclude(row):
 
 
 codes_mdd = [20, 21, 30, 31, 40, 41, 50, 51]
+codes_mdd_self_excluded = [20, 21, 30, 31, 40, 41]
 def mdd(v):
     if pd.isna(v):
         return NC  # NC
     elif int(v) in codes_mdd:
+        return MDD  # MDD
+    else:
+        return UNNORMAL  # Un-normal data
+
+
+def mdd_self_excluded(v):
+    if pd.isna(v):
+        return NC  # NC
+    elif int(v) in codes_mdd_self_excluded:
         return MDD  # MDD
     else:
         return UNNORMAL  # Un-normal data
@@ -65,7 +75,7 @@ def cnt_chronic_diseases(x):
     result = [str(elem) if not pd.isna(elem) else None for elem in x[diagnosis_ICD].tolist()]
     result = list(filter(None, result))
     chronic_num = startCnt(chronic_code_ICD10, result)
-    # print("ICD_disease: {}, chronic_num: {}".format(result, chronic_num))
+    print("ICD_disease: {}, chronic_num: {}".format(result, chronic_num))
     # return result, chronic_num
     return chronic_num
 
@@ -104,6 +114,7 @@ def format_MDD():
     df_MDD = df_MDD[~df_MDD['130894-0.0'].isin(values_to_exclude)]
     print("df_MDD diag_time excluded with ['1900-01-01', '1901-01-01', '1902-02-02', '1903-03-03', '1909-09-09', '2037-07-07'] : {}".format(df_MDD.shape[0]))
     df_MDD['MDD'] = df_MDD['130895-0.0'].map(mdd)
+    df_MDD['MDD_self_excluded'] = df_MDD['130895-0.0'].map(mdd_self_excluded)
     print("df_MDD: {}, NC:{}, MDD:{}, UNNORMAL:{}".format(df_MDD.shape[0], df_MDD[df_MDD['MDD'] == NC].shape[0], df_MDD[df_MDD['MDD'] == MDD].shape[0], df_MDD[df_MDD['MDD'] == UNNORMAL].shape[0]))
 
     df_chunk = pd.read_csv(root_path+"1.social_demography.csv", chunksize=50000, low_memory=False)

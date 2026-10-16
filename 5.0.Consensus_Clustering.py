@@ -38,24 +38,22 @@ def perform_consensus(exp):
 
 
 if __name__ == '__main__':
-    # perform_consensus('Diag')
-    # perform_consensus('DiagA')
-    # perform_consensus('DiagB')
+    perform_consensus('Diag_Discovery')
+    perform_consensus('Diag_Test')
 
-    exp = 'DiagA'
+    exp = 'Diag_Discovery'
     for n_components in range(2, 9):
         for cluster_num in range(2, 9):
-            # 基于4个聚类算法的聚类结果生成加权similarity_matrix
+            # 基于3个聚类算法的聚类结果生成加权similarity_matrix
             rst_file = result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", n_components, cluster_num)
             df = pd.read_csv(rst_file)
             df['final_cluster'] = df['final_cluster'].replace({1: 2, 2: 1})
             df.to_csv(rst_file, index=False)
-    exp = 'DiagB'
+    exp = 'Diag_Test'
     for n_components in range(2, 9):
         for cluster_num in range(2, 9):
-            # 基于4个聚类算法的聚类结果生成加权similarity_matrix
-            rst_file = result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", n_components,
-                                                                                     cluster_num)
+            # 基于3个聚类算法的聚类结果生成加权similarity_matrix
+            rst_file = result_path + "{}/{}/{}_components_cluster_rst_{}.csv".format(exp, "NMF", n_components, cluster_num)
             df = pd.read_csv(rst_file)
             df['final_cluster'] = df['final_cluster'].replace({1: 2, 2: 1})
             df.to_csv(rst_file, index=False)

@@ -5,8 +5,7 @@ def corr(exp):
     df = pd.read_csv(data_path + f"Linear_Regression_PRS_Dataset_{exp}.csv", low_memory=False)
     print(df.columns.tolist())
 
-    bonferroni_file = result_path + f"t_test_result_bonferroni_{exp}.csv"
-    cols = pd.read_csv(bonferroni_file)['col'].tolist()
+    cols = load_prote_sig_cols()
     prs_cols = ['5e08', '1e07', '5e07', '1e06', '5e06', '1e05', '5e05', '1e04', '5e04', '1e03', '5e03', '1e02', '5e02']
 
     f = open(result_path + f"spearmanr_corr_result_{exp}.csv", "w")
@@ -23,6 +22,5 @@ def corr(exp):
 
 
 if __name__ == '__main__':
-    # corr('Diag')
-    corr('DiagA')
-    corr('DiagB')
+    corr('Diag_Discovery')
+    corr('Diag_Test')
