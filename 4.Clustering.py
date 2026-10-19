@@ -86,18 +86,21 @@ def clustering_perform(exp_train):
                 hcluster_ward_labels, hcluster_ward_silhouette, hcluster_ward_calinski_harabasz, hcluster_ward_DBI = h_clustering(W, cluster_num, 'ward')
 
                 silhouette_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_silhouette,
                     "spectral_arpack": spectral_arpack_silhouette,
                     "hcluster_ward": hcluster_ward_silhouette
                 })
                 calinski_harabasz_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_calinski_harabasz,
                     "spectral_arpack": spectral_arpack_calinski_harabasz,
                     "hcluster_ward": hcluster_ward_calinski_harabasz
                 })
                 dbi_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_DBI,
                     "spectral_arpack": spectral_arpack_DBI,
@@ -159,18 +162,21 @@ def predict_test(exp_train='Diag_Discovery', exp_test='Diag_Test'):
                 spectral_arpack_silhouette, spectral_arpack_calinski_harabasz, spectral_arpack_DBI = silhouette_score(W, spectral_labels), calinski_harabasz_score(W, spectral_labels), davies_bouldin_score(W, spectral_labels)
                 hcluster_ward_silhouette, hcluster_ward_calinski_harabasz, hcluster_ward_DBI = silhouette_score(W, hcluster_labels), calinski_harabasz_score(W, hcluster_labels), davies_bouldin_score(W, hcluster_labels)
                 silhouette_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_silhouette,
                     "spectral_arpack": spectral_arpack_silhouette,
                     "hcluster_ward": hcluster_ward_silhouette
                 })
                 calinski_harabasz_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_calinski_harabasz,
                     "spectral_arpack": spectral_arpack_calinski_harabasz,
                     "hcluster_ward": hcluster_ward_calinski_harabasz
                 })
                 dbi_results.append({
+                    "components": n_components,
                     "clust_num": cluster_num,
                     "kmeans_lloyd": kmeans_lloyd_DBI,
                     "spectral_arpack": spectral_arpack_DBI,
